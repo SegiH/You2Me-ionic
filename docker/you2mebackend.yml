@@ -1,0 +1,19 @@
+version: '3.7'
+
+networks:
+    default:
+         name: YourNetworkName
+         external: true
+
+services:
+    You2MeBackend:
+        container_name: You2MeBackend
+        stdin_open: true
+        tty: true
+        image: you2mebackend:latest
+        hostname: You2MeBackend
+        volumes:
+            - /root/media/Music/Unsorted:/mnt/usb
+        networks:
+            - default
+        restart: always

@@ -1,0 +1,285 @@
+<ion-app>
+     <ion-menu class="menu" side="start" menu-id="first" content-id="you2meCard">
+          <ion-header>
+               <ion-toolbar color="primary">
+                    <ion-title>You2Me Settings</ion-title>
+               </ion-toolbar>
+          </ion-header>
+          
+          <ion-content>
+               <ion-list>
+                    <ion-item><span class="menuItemLabel">Backend URL:</span><ion-input id="backendURL" [(ngModel)]="dataService.backendURL" value="dataService.backendURL" (change)="saveBackendURL()"></ion-input></ion-item>
+                    <ion-item>Mobile Mode<ion-toggle [(ngModel)]="isMobilePlatform" color="primary"></ion-toggle></ion-item>
+                    <ion-item>Debugging<ion-toggle [(ngModel)]="dataService.debugging" color="primary"></ion-toggle></ion-item>
+               </ion-list>
+          </ion-content>
+     </ion-menu>
+        
+<ion-card class="ios hydrated" id="you2meCard">
+     <ion-card-header class="ion-inherit-color ios hydrated">
+          <ion-icon id="settingsIcon" name="settings-sharp" (click)="openMenu()"></ion-icon>
+          <ion-icon *ngIf="dataService.getLinks().length <13" id="addLinkIcon" name="add-sharp" (click)="addLinkClick()"></ion-icon>
+          <ion-card-title>{{ 'You2Me' + (dataService.debugging ? " (debugging)" : "") }}</ion-card-title>          
+          <ion-card-subtitle></ion-card-subtitle>
+     </ion-card-header>
+
+     <ion-card-content>
+          <ion-grid  *ngIf="!isMobilePlatform; else MobileContent" class="links">
+               <ion-row> <!-- Table column headers -->
+                    <ion-col class="tableHeader">URL</ion-col>
+                    <ion-col class="tableHeader">Format</ion-col>
+                    <ion-col class="tableHeader">Progress</ion-col>
+                    <ion-col class="tableHeader">Artist</ion-col>
+                    <ion-col class="tableHeader">Album</ion-col>
+                    <ion-col class="tableHeader">Name</ion-col>
+                    <ion-col class="tableHeader">TrackNum</ion-col>
+                    <ion-col class="tableHeader">Genre</ion-col>
+                    <ion-col class="tableHeader">Year</ion-col>
+                    <ion-col class="tableHeader">Action</ion-col>
+                    <ion-col class="tableHeader">Status</ion-col>
+                    <ion-col class="tableHeader">Delete</ion-col>
+               </ion-row>
+               
+               <ion-row *ngFor="let currLink of dataService.getLinks();trackBy: trackByFn" class="linkItem"> <!-- Links -->
+                         <ion-col size="1">
+                              <div *ngIf="currLink.IsSubmitted; else editURL">{{currLink.URL}}</div>
+                              
+                              <ng-template #editURL>
+                                   <ion-input [(ngModel)]="currLink.URL" [value]="currLink.URL" placeholder="URL" (change)="getThumbnail(currLink)"></ion-input>
+                              </ng-template>
+                         </ion-col>
+                         
+                         <ion-col>
+                              <ion-select placeholder='Format' name="format" [(ngModel)]="currLink.Format" [required]=true [disabled]="currLink.IsSubmitted">
+                                   <ion-select-option *ngFor="let currFormat of dataService.getFormatKeys();trackBy: trackByFn" [value]="currFormat">
+                                        {{dataService.formats[currFormat].FormatDisplayName}}
+                                   </ion-select-option>
+                              </ion-select>  
+                         </ion-col>
+
+                         <ion-col>
+                              <ion-progress-bar *ngIf="currLink.IsSubmitted" type="determinate" [value]="currLink.DownloadProgress"></ion-progress-bar>
+                         </ion-col>
+
+                         <!--  *ngIf="dataService.getLinks().length > 1 || ( dataService.getLinks().length == 1 && dataService.isAudioFormat(dataService.links[0].Format))" -->
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Artist'); else editArtist">{{currLink.Fields.Artist.Value}}</div>
+                             
+                              <ng-template  #editArtist>
+                                   <ion-input [(ngModel)]="currLink.Fields.Artist.Value" value="currLink.Fields.Artist.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <!--  *ngIf="dataService.getLinks().length > 1 || ( dataService.getLinks().length == 1 && dataService.isAudioFormat(dataService.links[0].Format))" -->
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Album'); else editAlbum">{{currLink.Fields.Album.Value}}</div>
+                             
+                              <ng-template  #editAlbum>
+                                   <ion-input [(ngModel)]="currLink.Fields.Album.Value" value="currLink.Fields.Album.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Name'); else editName">{{currLink.Fields.Name.Value}}</div>
+                             
+                              <ng-template  #editName>
+                                   <ion-input [(ngModel)]="currLink.Fields.Name.Value" value="currLink.Fields.Name.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <!--  *ngIf="dataService.getLinks().length > 1 || ( dataService.getLinks().length == 1 && dataService.isAudioFormat(dataService.links[0].Format))" -->
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'TrackNum'); else editTrackNum">{{currLink.Fields.TrackNum.Value}}</div>
+                             
+                              <ng-template  #editTrackNum>
+                                   <ion-input type="number" [(ngModel)]="currLink.Fields.TrackNum.Value" [(ngModel)]="currLink.Fields.TrackNum.Value" value="currLink.Fields.TrackNum.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <!--  *ngIf="dataService.getLinks().length > 1 || ( dataService.getLinks().length == 1 && dataService.isAudioFormat(dataService.links[0].Format))" -->
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Genre'); else editGenre">{{currLink.Fields.Genre.Value}}</div>
+                             
+                              <ng-template #editGenre>
+                                   <ion-input [(ngModel)]="currLink.Fields.Genre.Value" value="currLink.Fields.Genre.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <!--  *ngIf="dataService.getLinks().length > 1 || ( dataService.getLinks().length == 1 && dataService.isAudioFormat(dataService.links[0].Format))" -->
+                         <ion-col>
+                              <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Year'); else editYear">{{currLink.Fields.Year.Value}}</div>
+                             
+                              <ng-template  #editYear>
+                                   <ion-input type="number" [(ngModel)]="currLink.Fields.Year.Value" [(ngModel)]="currLink.Fields.Year.Value" value="currLink.Fields.Year.Value"></ion-input>
+                              </ng-template>
+                         </ion-col>
+
+                         <ion-col>
+                              <ion-button class="goButton" *ngIf="dataService.backendURL != null && !currLink.IsSubmitted" color="primary" (click)="goButtonClick(currLink)">Go</ion-button>
+                              <ion-button color="success" *ngIf="currLink.IsFinished && !currLink.IsError && !currLink.DownloadButtonClicked && !currLink.MoveToServerButtonClicked" (click)="downloadButtonClicked(currLink)">Download</ion-button>
+                              <ion-button color="danger" *ngIf="currLink.IsFinished && !currLink.IsError && allowMoveToServer && !currLink.DownloadButtonClicked && !currLink.MoveToServerButtonClicked" (click)="moveFileToServer(currLink)">Server</ion-button>
+                         </ion-col>
+
+                         <ion-col>
+                              <div>{{currLink.StatusMessage}}</div>
+                         </ion-col>
+
+                         <ion-col *ngIf="dataService.getLinks().length > 0">
+                              <div class="linkDeleteIcon"><ion-icon name="close-sharp" class="deleteLink" (click)="deleteLinkButtonClick(currLink)"></ion-icon></div>
+                         </ion-col>
+               </ion-row> 
+          </ion-grid>
+
+          <ng-template #MobileContent>               
+               <ion-accordion-group expand="true">
+                    <ion-accordion *ngFor="let currLink of dataService.getLinks();trackBy: trackByFn" class="linkItem">
+                         <ion-item slot="header">
+                              <ion-img class="thumbnailImage" *ngIf="currLink.URL != null && currLink.URL.includes('youtube.com') && currLink.ThumbnailURL != null" [src]="currLink.ThumbnailURL">Thumbnail</ion-img>
+                              <div *ngIf="currLink.ThumbnailLoaded != true">Link</div>
+                         </ion-item>
+
+                         <ion-list slot="content">
+                              <div class="linkDeleteIcon"><ion-icon name="close-sharp" class="deleteLinkMobile" (click)="deleteLinkButtonClick(currLink)"></ion-icon></div>
+                              <ion-grid>
+                                   <ion-row size="12">
+                                        <div class="mobileDiv" *ngIf="currLink.IsSubmitted"> 
+                                             <div>{{currLink.StatusMessage}}</div>
+                                             <!--<ion-progress-bar type="determinate" [value]="currLink.DownloadProgress"></ion-progress-bar>-->
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">URL:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted; else editURL">{{currLink.URL}}</div>
+                                   
+                                                  <ng-template #editURL>
+                                                       <ion-input [(ngModel)]="currLink.URL" [value]="currLink.URL" placeholder="URL" (change)="getThumbnail(currLink)"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Format:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted; else editFormat">{{currLink.Format}}</div>
+                                   
+                                                  <ng-template #editFormat>
+                                                       <ion-select id="mobileFormat" placeholder='Format' name="format" [(ngModel)]="currLink.Format" [required]=true [disabled]="currLink.IsSubmitted">
+                                                            <ion-select-option *ngFor="let currFormat of dataService.getFormatKeys();trackBy: trackByFn" [value]="currFormat">
+                                                                 {{dataService.formats[currFormat].FormatDisplayName}}
+                                                            </ion-select-option>
+                                                       </ion-select>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Artist:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Artist'); else editArtist">{{currLink.Fields.Artist.Value}}</div>
+                                   
+                                                  <ng-template #editArtist>
+                                                       <ion-input [(ngModel)]="currLink.Fields.Artist.Value" value="currLink.Fields.Artist.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Album:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Album'); else editAlbum">{{currLink.Fields.Album.Value}}</div>
+                                   
+                                                  <ng-template #editAlbum>
+                                                       <ion-input [(ngModel)]="currLink.Fields.Album.Value" value="currLink.Fields.Album.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Name:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Name'); else editName">{{currLink.Fields.Name.Value}}</div>
+                                   
+                                                  <ng-template #editName>
+                                                       <ion-input [(ngModel)]="currLink.Fields.Name.Value" value="currLink.Fields.Name.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Genre:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Genre'); else editGenre">{{currLink.Fields.Genre.Value}}</div>
+                                   
+                                                  <ng-template #editGenre>
+                                                       <ion-input [(ngModel)]="currLink.Fields.Genre.Value" value="currLink.Fields.Genre.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+                             
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Track Num:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'TrackNum'); else editTrackNum">{{currLink.Fields.TrackNum.Value}}</div>
+                                   
+                                                  <ng-template #editTrackNum>
+                                                       <ion-input type="number" class="numberField" [(ngModel)]="currLink.Fields.TrackNum.Value" value="currLink.Fields.TrackNum.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>   
+                             
+                                   <ion-row>
+                                        <div class="mobileDiv">
+                                             <div class="mobileLabel">Year:</div>                                        
+                                             
+                                             <div class="mobileField">
+                                                  <div *ngIf="currLink.IsSubmitted || dataService.fieldIsEditable(currLink.Format,'Year'); else editYear">{{currLink.Fields.Year.Value}}</div>
+                                   
+                                                  <ng-template #editYear>
+                                                       <ion-input type="number" class="numberField" [(ngModel)]="currLink.Fields.Year.Value" value="currLink.Fields.Year.Value"></ion-input>
+                                                  </ng-template>
+                                             </div>
+                                        </div>
+                                   </ion-row>
+
+                                   <ion-button class="goButton" *ngIf="dataService.backendURL != null && !currLink.IsSubmitted" color="primary" (click)="goButtonClick(currLink)">Go</ion-button>
+                                   <ion-button color="success" *ngIf="currLink.IsFinished && !currLink.IsError && !currLink.DownloadButtonClicked && !currLink.MoveToServerButtonClicked" (click)="downloadButtonClicked(currLink)">Download</ion-button>
+                                   <ion-button color="danger" *ngIf="currLink.IsFinished && !currLink.IsError && allowMoveToServer && !currLink.DownloadButtonClicked && !currLink.MoveToServerButtonClicked" (click)="moveFileToServer(currLink)">Server</ion-button>
+                              </ion-grid>
+                         </ion-list>
+                    </ion-accordion>
+               </ion-accordion-group>
+          </ng-template>
+
+          <div id="debugging" *ngIf="debuggingCheckboxVisible">
+               <ion-label>Debugging</ion-label><ion-checkbox [(ngModel)]="dataService.debugging"></ion-checkbox>
+          </div>
+     </ion-card-content>
+</ion-card>
+
+
+    
+   
+   </ion-app>

@@ -1,0 +1,166 @@
+:root {
+  --bg-color: #DADBDC;
+}
+
+.deleteLink {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 24px;
+  position: absolute;
+  margin-top: 8%;
+}
+
+.deleteLinkMobile {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 24px;
+  margin-left: 89%;
+}
+
+.ion-page {
+  background-color: #757679 !important;
+}
+
+.linkItem {
+  background-color: #EDF0F5;
+}
+
+.menu {
+  --width: 500px;
+}
+
+.menuItemLabel {
+  margin-right: 15px;
+}
+
+.mobileDiv {
+  display: flex;
+  max-width: 500px;
+}
+
+.mobileField {
+  margin-lefT: 25px;
+  max-width: 300px;
+}
+
+.mobileField > ion-input {
+    max-height: 25px;
+}
+
+.mobileField > ion-input.numberField {
+  width: 100px;
+}
+
+.mobileLabel {
+  min-width: 155px;
+  text-align: left;
+}
+
+.tableHeader {
+  background-color: #53A2F0;
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  text-align: center;
+  border-style: solid;  
+  border-collapse: collapse;
+  border-width: 1px !important;
+}
+
+.thumbnailImage {
+     width: 8%;
+}
+
+#addLinkIcon {
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 24px;
+  margin-left: 98%;
+  position: relative;
+  left: -50px;
+  top: -30px;
+}
+
+#backendDiv {
+  display: flex;
+  width: 900px;
+}
+
+#backendLabel {
+  margin-top: 1%;
+}
+
+#backendURL {
+  border-style: none;
+  max-width: 300px;
+  vertical-align: top !important;
+}
+
+#debugging {
+  text-align: left;
+  vertical-align: center;
+}
+
+#debugging ion-checkbox {
+     margin-top: 1%;
+}
+
+#debugging ion-label {
+      margin-right: 25px;
+}
+
+#editBackendURL {
+      margin-top: 1%;
+      width: 25px;
+      height: 25px;
+}
+
+#mobileFormat {
+  display: ruby;
+}
+
+#settingsIcon {
+  color: black;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 24px;
+  margin-left: 98%;
+}
+
+#showSupportedURLs {
+  text-align: left;
+}
+
+#you2meCard {
+  background-color: #dadbdc;
+  text-align: center;
+}
+
+ion-card-title {
+  font-size: 32px !important;
+  font-weight: bold;  
+}
+
+ion-col {
+  border-style: solid;  
+  border-collapse: collapse;
+  border-width: 1px !important;
+}
+ion-col ion-progress-bar {
+     margin-top: 10%;
+}
+
+ion-grid.links {
+  border-style: solid;  
+  border-collapse: collapse;
+  border-width: 1px !important;
+  box-shadow: inset 1px 1px 1px #000;
+  text-align: center
+}
+
+ion-input {
+  border-style: solid;  
+  border-collapse: collapse;
+  border-width: 1px !important;
+}

@@ -1,0 +1,8 @@
+{
+    "/" : {
+      "target": "https://you2me-backend.hovav.org/",
+      "changeOrigin": true,
+      "secure": true,
+      "logLevel": "debug"
+    }
+  }

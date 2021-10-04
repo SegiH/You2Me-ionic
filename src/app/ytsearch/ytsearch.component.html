@@ -1,0 +1,28 @@
+<ion-card id="searchYTPanel">
+     <ion-card-header class="ion-inherit-color ios hydrated">
+          <ion-card-subtitle></ion-card-subtitle>
+          <ion-card-title >Youtube Search</ion-card-title>
+     </ion-card-header>
+
+     <ion-card-content>
+          <ion-row size="12">         
+               <ion-searchbar [(ngModel)]="searchTerm" (ionChange)="searchYTChange()"></ion-searchbar>
+          </ion-row>
+          
+          <ion-accordion-group>
+               <ion-accordion *ngFor="let currSearchResult of this.searchResults">
+                    <ion-item slot="header">
+                         <ion-col><span>{{currSearchResult.snippet.title}}</span></ion-col>
+                         <ion-button class="addToYou2Me" color="primary" (click)="addSearchResult(currSearchResult)">Add</ion-button>
+                         <!--<ion-img [src]="currSearchResult.snippet.thumbnails.default.url"></ion-img>-->
+                    </ion-item>
+
+                    <ion-list slot="content">
+                         <ion-item><a [href]=createHyperlink(currSearchResult.id.videoId) target="_blank"><ion-label>YouTube Video ID: {{ currSearchResult.id.videoId }}</ion-label></a></ion-item>
+                         <ion-item><ion-label>Description: {{currSearchResult.snippet.description}}</ion-label></ion-item>
+                         <ion-item><youtube-player #player [videoId]="currSearchResult.id.videoId" [width]="250" [height]="250"></youtube-player></ion-item>
+                    </ion-list>  
+               </ion-accordion>
+          </ion-accordion-group>
+     </ion-card-content>
+</ion-card>
