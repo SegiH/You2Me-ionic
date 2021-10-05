@@ -8,7 +8,7 @@
           
           <ion-content>
                <ion-list>
-                    <ion-item><span class="menuItemLabel">Backend URL:</span><ion-input id="backendURL" [(ngModel)]="dataService.backendURL" value="dataService.backendURL" (change)="saveBackendURL()"></ion-input></ion-item>
+                    <ion-item><span class="menuItemLabel">Backend URL:</span><ion-input id="backendURL" [(ngModel)]="dataService.backendURL" value="dataService.backendURL" (change)="dataService.saveBackendURL()"></ion-input></ion-item>
                     <ion-item>Mobile Mode<ion-toggle [(ngModel)]="isMobilePlatform" color="primary"></ion-toggle></ion-item>
                     <ion-item>Debugging<ion-toggle [(ngModel)]="dataService.debugging" color="primary"></ion-toggle></ion-item>
                </ion-list>

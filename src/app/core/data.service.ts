@@ -4,6 +4,7 @@ import { throwError, Observable } from 'rxjs/';
 import { catchError} from 'rxjs/operators';
 import { UUID } from 'angular2-uuid';
 import { ToastController } from '@ionic/angular';
+import { Storage } from '@ionic/storage';
 
 let stepperIndex = 0;
 
@@ -54,14 +55,28 @@ export class DataService {
      readonly URLParameters = ['URL','Artist','Album','Format','Genre','Name','TrackNum','MoveToServer','Year','Debugging'];
      YTSearchOverlayRef;
      
-     constructor(public toastController: ToastController, private http: HttpClient) {
+     constructor(public toastController: ToastController, private http: HttpClient,private storage: Storage) {
+          this.getBackendURL();
+     }
+
+     async getBackendURL() {
+          await this.storage.create();
+
+          this.backendURL = await this.storage.get('BackEndURL');
+
+          if (this.backendURL == null) {
+               this.showSnackBarMessage("Please enter the backend URL in the settings");
+               return;
+          }
+
+          // Once the back end URL has been loaded, get the formats & API key
           this.loadFormats().subscribe((response) => {
                if (response === null)
                     return Promise.reject('Null response when getting formats');
-
+     
                response.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
                Object.freeze(this.formats);
-            
+                 
                response.map(x => this.formatKeys.push(x.FormatName));
                Object.freeze(this.formatKeys);
           },
@@ -87,12 +102,21 @@ export class DataService {
                     {"FormatID":"18","0":"18","FormatDisplayName":"Convert to mp4","1":"Convert to mp4","FormatName":"mp4","2":"mp4","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
                     {"FormatID":"19","0":"19","FormatDisplayName":"Convert to ogg","1":"Convert to ogg","FormatName":"ogg","2":"ogg","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
                     {"FormatID":"20","0":"20","FormatDisplayName":"Convert to webm","1":"Convert to webm","FormatName":"webm","2":"webm","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"}];
-
+     
                formats.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
                Object.freeze(this.formats);
-
+     
                Object.keys(formats).map(x => this.formatKeys.push(formats[x].FormatName));
                Object.freeze(this.formatKeys);
+          });
+
+          this.getAPIKey().subscribe((response) => {
+               this.setAPIKey(response[0].APIKey);
+          },
+          error => {
+               alert(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
+               console.log(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
+               return throwError("An error occurred getting the API Key");
           });
      }
      
@@ -315,6 +339,9 @@ export class DataService {
      } 
 
      processStep(path: string, params: HttpParams): Observable<any> {
+          if (this.backendURL == null) {
+               return;
+          }
 
           return this.http.get<any>(this.backendURL + path, { params: params})
                .pipe(
@@ -325,6 +352,14 @@ export class DataService {
      // Escapes all special characters so they can safely be passed as URL parameters
      private rfc3986EncodeURIComponent(str) {  
           return encodeURIComponent(str).replace(/[!'()*]/g, escape);  
+     }
+
+     async saveBackendURL() {
+          if (this.backendURL != null && this.backendURL != "") {
+               await this.storage.set('BackEndURL', this.backendURL); //Save the URL
+          } else {
+               await this.storage.remove('BackEndURL');
+          }
      }
 
      searchVideos(query: string): Observable <any> {

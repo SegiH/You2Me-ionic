@@ -3,18 +3,16 @@
 // Fix issue on mobile getting YT API Key
 // change web icon
 // change android/ios icon
-// do not start dl progress for now
-// Remove ismobileplatform=true from end of nginit
-// format code neatly
-// audio fingerprinting does not work
 
+// do not start dl progress for now
+// audio fingerprinting does not work
 
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../core/data.service';
 import { DownloadService } from '../core/download.service';
-import { interval, throwError } from "rxjs";
+import { interval } from "rxjs";
 import { AlertController } from '@ionic/angular';
-import { Storage } from '@ionic/storage';
+
 import { Platform } from '@ionic/angular';
 import { MenuController } from '@ionic/angular';
 
@@ -33,14 +31,14 @@ export class Y2MPage implements OnInit  {
      supportedURLsVisible = false;
      urlParams: {};
   
-     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService, private storage: Storage, platform: Platform,private menu: MenuController) {
+     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService, platform: Platform,private menu: MenuController) {
           this.platform = platform;
 
           if (this.platform.is('hybrid'))
                this.isMobilePlatform=true;
      }
 
-     async ngOnInit() {
+     ngOnInit() {
           // Save current debugging value
           const currDebugging = this.dataService.debugging;
 
@@ -81,25 +79,6 @@ export class Y2MPage implements OnInit  {
                document.body.appendChild(tag);
                this.apiLoaded = true;               
           }
-
-          this.dataService.getAPIKey().subscribe((response) => {
-               this.dataService.setAPIKey(response[0].APIKey);
-          },
-          error => {
-               //alert(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
-               console.log(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
-               return throwError("An error occurred getting the API Key");
-          });
-
-          await this.storage.create();
-
-          this.dataService.backendURL = await this.storage.get('BackEndURL');
-
-          if (this.dataService.backendURL == null)
-               this.dataService.showSnackBarMessage("Please enter the backend URL in the settings");
-
-          // DELETE ME LATER!!
-          this.isMobilePlatform=true;
      }
 
      addLinkClick() {
@@ -470,13 +449,6 @@ export class Y2MPage implements OnInit  {
                this.urlParams[decodeURI(x[0]).toUpperCase()] = decodeURI(x[1]) + (
                     typeof x[2] !== 'undefined' ? '=' + decodeURI(x[2]) : '')
                );
-     }
-
-     async saveBackendURL() {
-          if (this.dataService.backendURL != null && this.dataService.backendURL != "")               
-               await this.storage.set('BackEndURL', this.dataService.backendURL); //Save the URL
-          else
-               await this.storage.remove('BackEndURL');
      }
 
      startDownloadProgressMonitor(currLink: object) {
