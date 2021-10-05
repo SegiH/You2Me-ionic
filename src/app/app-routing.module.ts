@@ -12,7 +12,7 @@ const routes: Routes = [
   },
   {
     path: 'search',
-    loadChildren: () => import('./ytsearch/ytsearch.module').then( m => m.HomePageModule)
+    loadChildren: () => import('./ytsearch/ytsearch.module').then( m => m.Y2MSearchPageModule)
   },
   {
     path: 'Search',
@@ -21,7 +21,7 @@ const routes: Routes = [
   },
   {
     path: '',
-    loadChildren: () => import('./y2m/y2m.module').then( m => m.HomePageModule),
+    loadChildren: () => import('./y2m/y2m.module').then( m => m.Y2MPageModule),
     pathMatch: 'full'
   },
 ];

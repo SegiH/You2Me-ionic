@@ -1,9 +1,9 @@
 // TO DO
 // Need to scroll vertically on both tabs on both platforms
-// Fix issue on mobile getting YT API Key
 // change web icon
 // change android/ios icon
 
+// downloading does not work on mobile
 // do not start dl progress for now
 // audio fingerprinting does not work
 
@@ -193,8 +193,9 @@ export class Y2MPage implements OnInit  {
 
           // Subscribe to DL service and wait for the done response 
           this.downloads.download(currLink['DownloadLink'], fileNameWithoutPath).subscribe((response) => {
-               //console.log("Response: " + response.state);
+               //console.log("Response: " + response.state);               
                if (response.state === "DONE") {
+                    this.dataService.showSnackBarMessage(currLink['DownloadLink']);
                     this.dataService.deleteLink(currLink['URL']); // Delete link from list
 
                     // Send request to delete the file

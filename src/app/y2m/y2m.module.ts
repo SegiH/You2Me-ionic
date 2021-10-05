@@ -3,15 +3,15 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
 import { Y2MPage } from './y2m.page';
-import { HomePageRoutingModule } from './y2m-routing.module';
+import { AppPageRoutingModule } from './y2m-routing.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,    
     IonicModule,
-    HomePageRoutingModule
+    AppPageRoutingModule
   ],
   declarations: [Y2MPage]
 })
-export class HomePageModule {}
+export class Y2MPageModule {}
