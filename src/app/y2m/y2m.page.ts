@@ -1,5 +1,4 @@
 // TO DO
-// Need to scroll vertically on both tabs on both platforms
 // change web icon
 // change android/ios icon
 
@@ -12,8 +11,6 @@ import { DataService } from '../core/data.service';
 import { DownloadService } from '../core/download.service';
 import { interval } from "rxjs";
 import { AlertController } from '@ionic/angular';
-
-import { Platform } from '@ionic/angular';
 import { MenuController } from '@ionic/angular';
 
 @Component({
@@ -22,21 +19,9 @@ import { MenuController } from '@ionic/angular';
      styleUrls: ['y2m.page.scss'],
 })
 export class Y2MPage implements OnInit  {
-     allowMoveToServer = true;
-     apiLoaded = false;
-     confirmDialogVisible = false;
-     isMobilePlatform = false;
-     platform: Platform;
-     supportedURLsDataSource: string[];
-     supportedURLsVisible = false;
      urlParams: {};
   
-     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService, platform: Platform,private menu: MenuController) {
-          this.platform = platform;
-
-          if (this.platform.is('hybrid'))
-               this.isMobilePlatform=true;
-     }
+     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController) { }
 
      ngOnInit() {
           // Save current debugging value
@@ -69,15 +54,6 @@ export class Y2MPage implements OnInit  {
 
                if (name != null)
                     this.dataService.links[0]['Fields']['Name'].Value=name;
-          }
-
-          // Load Youtube player API code
-          if (!this.apiLoaded) {
-               // This code loads the IFrame Player API code asynchronously, according to the instructions at https://developers.google.com/youtube/iframe_api_reference#Getting_Started
-               const tag = document.createElement('script');
-               tag.src = 'https://www.youtube.com/iframe_api';
-               document.body.appendChild(tag);
-               this.apiLoaded = true;               
           }
      }
 
@@ -112,7 +88,7 @@ export class Y2MPage implements OnInit  {
                this.startDownloadProgressMonitor(currLink);
 
           // Call data service to download the file
-          this.dataService.fetchFile(currLink, this.allowMoveToServer, this.dataService.debugging)
+          this.dataService.fetchFile(currLink)
                .subscribe((response) => {
                     // Stop the REST service that gets the download status
                     if (!this.dataService.debugging)
@@ -129,7 +105,7 @@ export class Y2MPage implements OnInit  {
                     currLink['Filename'] = response[0];
 
                     if (this.dataService.isAudioFormat(currLink['Format'])) {
-                    // Second index will be Artist if matched through Python script that does audio fingerprinting
+                         // Second index will be Artist if matched through Python script that does audio fingerprinting
                          if (typeof response[1] !== 'undefined' && response[1] !== "" &&  currLink['Fields']['Artist'].Value == "")
                               currLink['Fields']['Artist'].Value = response[1];                         
 
@@ -140,43 +116,40 @@ export class Y2MPage implements OnInit  {
                          //if (typeof response[3] !== 'undefined' && response[3] !== "")
                          //     currLink['ThumbnailImage'] = response[3];
 
-                    if (currLink['Fields']['Artist'].Value == '') {
-                         this.dataService.showSnackBarMessage("Please enter the artist name");
+                         if (currLink['Fields']['Artist'].Value == '') {
+                              this.dataService.showSnackBarMessage("Please enter the artist name");
+                              currLink['CurrentStep'] = 2;
+                              currLink['IsSubmitted'] = false;
+                              return;
+                         }
+                    } //else if (typeof response[1] !== 'undefined' && response[1] !== "")
+                    // currLink['ThumbnailImage'] = response[1];
+
+                    if (currLink['Fields']['Name'].Value == '') {
+                         this.dataService.showSnackBarMessage("Please enter the name");
                          currLink['CurrentStep'] = 2;
                          currLink['IsSubmitted'] = false;
                          return;
                     }
-               } //else if (typeof response[1] !== 'undefined' && response[1] !== "")
-                   // currLink['ThumbnailImage'] = response[1];
 
-               if (currLink['Fields']['Name'].Value == '') {
-                    this.dataService.showSnackBarMessage("Please enter the name");
-                    currLink['CurrentStep'] = 2;
-                    currLink['IsSubmitted'] = false;
-                    return;
-               }
+                    currLink['CurrentStep']++;
 
-               currLink['CurrentStep']++;
+                    // Stop the download progress subscription
+                    this.dataService.deleteDownloadProgress(currLink['UUID']).subscribe((response) => {
+               },
+               error => {
+                    console.log("An error occurred terminating the download progress subscription");
+               });
 
-               // Stop the download progress subscription
-               this.dataService.deleteDownloadProgress(currLink['UUID']).subscribe((response) => {
-          },
-          error => {
-               console.log("An error occurred terminating the download progress subscription");
-          });
+               if (this.dataService.isMP3Format(currLink['Format'])) {
+                    currLink['StatusMessage'] = 'File was downloaded';
+                    this.writeID3Tags(currLink);
+               } else {
+                    // The response returns the URL for the downloaded file
+                    currLink['DownloadLink'] = decodeURIComponent(response[0].replace(/\+/g, ' '));
 
-          if (this.dataService.isMP3Format(currLink['Format'])) {
-               currLink['StatusMessage'] = 'File was downloaded';
-               this.writeID3Tags(currLink);
-          } else {
-               // The response returns the URL for the downloaded file
-               currLink['DownloadLink'] = decodeURIComponent(response[0].replace(/\+/g, ' '));
+                    currLink['StatusMessage'] = 'File is ready';
 
-               currLink['StatusMessage'] = 'File is ready';               
-
-               if (this.allowMoveToServer) {
-                    this.moveFileToServer(currLink);
-               } else
                     this.finished(currLink);
                }
           },
@@ -399,9 +372,6 @@ export class Y2MPage implements OnInit  {
      }
 
      moveFileToServer(currLink: object) {
-          if (!this.allowMoveToServer)
-               return;
-
           currLink['MoveToServerButtonClicked'] = true;
 
           this.dataService.moveFile(currLink).subscribe((response) => {

@@ -137,6 +137,10 @@
   text-align: center;
 }
 
+ion-card {
+  overflow-y: auto;
+}
+
 ion-card-title {
   font-size: 32px !important;
   font-weight: bold;  

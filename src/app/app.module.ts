@@ -5,13 +5,12 @@ import { RouteReuseStrategy } from '@angular/router';
 import { IonicModule, IonicRouteStrategy } from '@ionic/angular';
 import { AppComponent } from './app.component';
 import { AppRoutingModule } from './app-routing.module';
-import { ConfirmDialogComponent } from './confirmdialog/confirmdialog.component';
 import {YouTubePlayerModule} from '@angular/youtube-player';
 import { SAVER, getSaver } from './core/saver.provider';
 import { IonicStorageModule } from '@ionic/storage-angular';
 
 @NgModule({
-  declarations: [AppComponent,ConfirmDialogComponent],
+  declarations: [AppComponent],
   entryComponents: [],
   imports: [BrowserModule, CoreModule, IonicModule.forRoot(), IonicStorageModule.forRoot(), AppRoutingModule, YouTubePlayerModule],
   providers: [{ provide: RouteReuseStrategy, useClass: IonicRouteStrategy },{provide: SAVER, useFactory: getSaver} ],

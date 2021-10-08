@@ -9,8 +9,8 @@
           <ion-content>
                <ion-list>
                     <ion-item><span class="menuItemLabel">Backend URL:</span><ion-input id="backendURL" [(ngModel)]="dataService.backendURL" value="dataService.backendURL" (change)="dataService.saveBackendURL()"></ion-input></ion-item>
-                    <ion-item>Mobile Mode<ion-toggle [(ngModel)]="isMobilePlatform" color="primary"></ion-toggle></ion-item>
-                    <ion-item>Debugging<ion-toggle [(ngModel)]="dataService.debugging" color="primary"></ion-toggle></ion-item>
+                    <ion-item>Mobile Mode<ion-toggle [(ngModel)]="dataService.isMobilePlatform" color="primary" (ionChange)="dataService.saveMobileMode()"></ion-toggle></ion-item>
+                    <ion-item>Debugging<ion-toggle [(ngModel)]="dataService.debugging" color="primary" (ionChange)="dataService.saveDebugging()"></ion-toggle></ion-item>
                </ion-list>
           </ion-content>
      </ion-menu>
@@ -18,13 +18,13 @@
 <ion-card class="ios hydrated" id="you2meCard">
      <ion-card-header class="ion-inherit-color ios hydrated">
           <ion-icon id="settingsIcon" name="settings-sharp" (click)="openMenu()"></ion-icon>
-          <ion-icon *ngIf="dataService.getLinks().length <13" id="addLinkIcon" name="add-sharp" (click)="addLinkClick()"></ion-icon>
+          <ion-icon id="addLinkIcon" name="add-sharp" (click)="addLinkClick()"></ion-icon>
           <ion-card-title>{{ 'You2Me' + (dataService.debugging ? " (debugging)" : "") }}</ion-card-title>          
           <ion-card-subtitle></ion-card-subtitle>
      </ion-card-header>
 
      <ion-card-content>
-          <ion-grid  *ngIf="!isMobilePlatform; else MobileContent" class="links">
+          <ion-grid  *ngIf="!dataService.isMobilePlatform; else MobileContent" class="links">
                <ion-row> <!-- Table column headers -->
                     <ion-col class="tableHeader">URL</ion-col>
                     <ion-col class="tableHeader">Format</ion-col>
@@ -278,8 +278,4 @@
           </div>
      </ion-card-content>
 </ion-card>
-
-
-    
-   
-   </ion-app>
+</ion-app>

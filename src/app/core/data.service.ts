@@ -3,6 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { throwError, Observable } from 'rxjs/';
 import { catchError} from 'rxjs/operators';
 import { UUID } from 'angular2-uuid';
+import { Platform } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
 
@@ -10,11 +11,12 @@ let stepperIndex = 0;
 
 @Injectable()
 export class DataService {
+     apiLoaded = false;
      backendURL: string=null;
      links: any = [];
      private API_TOKEN="";
      readonly API_URL='https://www.googleapis.com/youtube/v3/search';
-     debugging = true;
+     debugging = false;
      readonly fields: any  = {
           'Artist': {
                'Required':true,
@@ -51,73 +53,32 @@ export class DataService {
 
      formats: Object = {};
      formatKeys = [];
+     isMobilePlatform = false;
+     platform: Platform;
      readonly stepperStepNames = ['Started download', 'Finished download', 'Writing ID3 Tags','Your file is ready'];     
      readonly URLParameters = ['URL','Artist','Album','Format','Genre','Name','TrackNum','MoveToServer','Year','Debugging'];
      YTSearchOverlayRef;
      
-     constructor(public toastController: ToastController, private http: HttpClient,private storage: Storage) {
-          this.getBackendURL();
-     }
+     constructor(public toastController: ToastController, private http: HttpClient, platform: Platform ,private storage: Storage) {
+          this.platform = platform;
 
-     async getBackendURL() {
-          await this.storage.create();
-
-          this.backendURL = await this.storage.get('BackEndURL');
-
-          if (this.backendURL == null) {
-               this.showSnackBarMessage("Please enter the backend URL in the settings");
-               return;
+          // Load Youtube player API code
+          if (!this.apiLoaded) {
+               // This code loads the IFrame Player API code asynchronously, according to the instructions at https://developers.google.com/youtube/iframe_api_reference#Getting_Started
+               const tag = document.createElement('script');
+               tag.src = 'https://www.youtube.com/iframe_api';
+               document.body.appendChild(tag);
+               this.apiLoaded = true;               
           }
 
-          // Once the back end URL has been loaded, get the formats & API key
-          this.loadFormats().subscribe((response) => {
-               if (response === null)
-                    return Promise.reject('Null response when getting formats');
-     
-               response.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
-               Object.freeze(this.formats);
-                 
-               response.map(x => this.formatKeys.push(x.FormatName));
-               Object.freeze(this.formatKeys);
-          },
-          error => {
-               const formats= [
-                    {"FormatID":"1","0":"1","FormatDisplayName":"aac","1":"aac","FormatName":"aac","2":"aac","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"2","0":"2","FormatDisplayName":"flac","1":"flac","FormatName":"flac","2":"flac","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"3","0":"3","FormatDisplayName":"m4a","1":"m4a","FormatName":"m4a","2":"m4a","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"4","0":"4","FormatDisplayName":"mp3 128k","1":"mp3 128k","FormatName":"128k","2":"128k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"5","0":"5","FormatDisplayName":"mp3 192k","1":"mp3 192k","FormatName":"192k","2":"192k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"6","0":"6","FormatDisplayName":"mp3 256k","1":"mp3 256k","FormatName":"256k","2":"256k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"7","0":"7","FormatDisplayName":"mp3 320k","1":"mp3 320k","FormatName":"320k","2":"320k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"8","0":"8","FormatDisplayName":"mp3 VBR 0 (Best)","1":"mp3 VBR 0 (Best)","FormatName":"0","2":"0","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"9","0":"9","FormatDisplayName":"mp3 VBR (5) (OK)","1":"mp3 VBR (5) (OK)","FormatName":"5","2":"5","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"10","0":"10","FormatDisplayName":"mp3 VBR (9) (Worst)","1":"mp3 VBR (9) (Worst)","FormatName":"9","2":"9","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"11","0":"11","FormatDisplayName":"opus","1":"opus","FormatName":"opus","2":"opus","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"12","0":"12","FormatDisplayName":"vorbis","1":"vorbis","FormatName":"vorbis","2":"vorbis","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"13","0":"13","FormatDisplayName":"wav","1":"wav","FormatName":"wav","2":"wav","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
-                    {"FormatID":"14","0":"14","FormatDisplayName":"No conversion","1":"No conversion","FormatName":"original","2":"original","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"15","0":"15","FormatDisplayName":"Convert to avi","1":"Convert to avi","FormatName":"avi","2":"avi","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"16","0":"16","FormatDisplayName":"Convert to flv","1":"Convert to flv","FormatName":"flv","2":"flv","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"17","0":"17","FormatDisplayName":"Convert to mkv","1":"Convert to mkv","FormatName":"mkv","2":"mkv","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"18","0":"18","FormatDisplayName":"Convert to mp4","1":"Convert to mp4","FormatName":"mp4","2":"mp4","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"19","0":"19","FormatDisplayName":"Convert to ogg","1":"Convert to ogg","FormatName":"ogg","2":"ogg","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
-                    {"FormatID":"20","0":"20","FormatDisplayName":"Convert to webm","1":"Convert to webm","FormatName":"webm","2":"webm","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"}];
-     
-               formats.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
-               Object.freeze(this.formats);
-     
-               Object.keys(formats).map(x => this.formatKeys.push(formats[x].FormatName));
-               Object.freeze(this.formatKeys);
-          });
+          if (this.platform.is('hybrid'))
+               this.isMobilePlatform=true;
 
-          this.getAPIKey().subscribe((response) => {
-               this.setAPIKey(response[0].APIKey);
-          },
-          error => {
-               alert(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
-               console.log(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
-               return throwError("An error occurred getting the API Key");
-          });
+          this.getBackendURL();
+
+          this.getDebugging();
+
+          this.getMobileMode();
      }
      
      addLink(newURL: string = null,newFormat: string="320k") {
@@ -192,7 +153,7 @@ export class DataService {
           });
      }
 
-     fetchFile(currLink: object, allowMoveToServer: boolean, debugging: boolean) {
+     fetchFile(currLink: object) {
           const fileName: string = (this.isAudioFormat("") && !isNaN(parseInt(this.fields.TrackNum.Value)) ? this.fields.TrackNum.Value + " " : "" ) + (this.fields.Name.Value != "" ? this.fields.Name.Value : "Unknown");
 
           // extra URL parameters in a Youtube link causes issues for youtube-dl
@@ -205,8 +166,7 @@ export class DataService {
           let params = new HttpParams();
           params = params.append('URL',currLink['URL']);
           params = params.append('Filename',this.rfc3986EncodeURIComponent(fileName));
-          params = params.append('Debugging',debugging);
-          params = params.append('AllowMoveToServer',(allowMoveToServer ? "true" : "false"));
+          params = params.append('Debugging',this.debugging);
           params = params.append('CurrUUID',currLink['UUID']);
 
           if (this.isAudioFormat(currLink['Format'])) {
@@ -239,6 +199,85 @@ export class DataService {
 
      getAPIKey() {
           return this.processStep("/GetAPIKey",null);
+     }
+
+     async getBackendURL() {
+          await this.storage.create();
+
+          this.backendURL = await this.storage.get('BackEndURL');
+
+          if (this.backendURL == null) {
+               this.showSnackBarMessage("Please enter the backend URL in the settings");
+               return;
+          }
+
+          // Once the back end URL has been loaded, get the formats & API key
+          this.loadFormats().subscribe((response) => {
+               if (response === null)
+                    return Promise.reject('Null response when getting formats');
+     
+               response.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
+               Object.freeze(this.formats);
+                 
+               response.map(x => this.formatKeys.push(x.FormatName));
+               Object.freeze(this.formatKeys);
+          },
+          error => {
+               const formats= [
+                    {"FormatID":"1","0":"1","FormatDisplayName":"aac","1":"aac","FormatName":"aac","2":"aac","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"2","0":"2","FormatDisplayName":"flac","1":"flac","FormatName":"flac","2":"flac","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"3","0":"3","FormatDisplayName":"m4a","1":"m4a","FormatName":"m4a","2":"m4a","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"4","0":"4","FormatDisplayName":"mp3 128k","1":"mp3 128k","FormatName":"128k","2":"128k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"5","0":"5","FormatDisplayName":"mp3 192k","1":"mp3 192k","FormatName":"192k","2":"192k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"6","0":"6","FormatDisplayName":"mp3 256k","1":"mp3 256k","FormatName":"256k","2":"256k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"7","0":"7","FormatDisplayName":"mp3 320k","1":"mp3 320k","FormatName":"320k","2":"320k","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"8","0":"8","FormatDisplayName":"mp3 VBR 0 (Best)","1":"mp3 VBR 0 (Best)","FormatName":"0","2":"0","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"9","0":"9","FormatDisplayName":"mp3 VBR (5) (OK)","1":"mp3 VBR (5) (OK)","FormatName":"5","2":"5","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"10","0":"10","FormatDisplayName":"mp3 VBR (9) (Worst)","1":"mp3 VBR (9) (Worst)","FormatName":"9","2":"9","FormatTypeID":"1","3":"1","IsMP3Format":"1","4":"1","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"11","0":"11","FormatDisplayName":"opus","1":"opus","FormatName":"opus","2":"opus","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"12","0":"12","FormatDisplayName":"vorbis","1":"vorbis","FormatName":"vorbis","2":"vorbis","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"13","0":"13","FormatDisplayName":"wav","1":"wav","FormatName":"wav","2":"wav","FormatTypeID":"1","3":"1","IsMP3Format":"0","4":"0","FormatTypeName":"Audio","5":"Audio"},
+                    {"FormatID":"14","0":"14","FormatDisplayName":"No conversion","1":"No conversion","FormatName":"original","2":"original","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"15","0":"15","FormatDisplayName":"Convert to avi","1":"Convert to avi","FormatName":"avi","2":"avi","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"16","0":"16","FormatDisplayName":"Convert to flv","1":"Convert to flv","FormatName":"flv","2":"flv","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"17","0":"17","FormatDisplayName":"Convert to mkv","1":"Convert to mkv","FormatName":"mkv","2":"mkv","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"18","0":"18","FormatDisplayName":"Convert to mp4","1":"Convert to mp4","FormatName":"mp4","2":"mp4","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"19","0":"19","FormatDisplayName":"Convert to ogg","1":"Convert to ogg","FormatName":"ogg","2":"ogg","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"},
+                    {"FormatID":"20","0":"20","FormatDisplayName":"Convert to webm","1":"Convert to webm","FormatName":"webm","2":"webm","FormatTypeID":"2","3":"2","IsMP3Format":"0","4":"0","FormatTypeName":"Video","5":"Video"}];
+     
+               formats.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
+               Object.freeze(this.formats);
+     
+               Object.keys(formats).map(x => this.formatKeys.push(formats[x].FormatName));
+               Object.freeze(this.formatKeys);
+          });
+
+          this.getAPIKey().subscribe((response) => {
+               this.setAPIKey(response[0].APIKey);
+          },
+          error => {
+               alert(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
+               console.log(`An error occurred initializing YouTube search with the error ${error.error} and this functionality will not be available`);
+               return throwError("An error occurred getting the API Key");
+          });
+     }
+
+     async getDebugging() {
+          await this.storage.create();
+
+          const debugging = await this.storage.get('Debugging');
+
+          this.debugging=(debugging === true ? true : false);
+
+          console.log(`getting value when debugging=${debugging} and this.debugging=${this.debugging}`)
+     }
+
+     async getMobileMode() {
+          await this.storage.create();
+
+          const mobileMode = await this.storage.get('MobileMode');
+
+          this.isMobilePlatform=(mobileMode === true ? true : false);
      }
 
      getDownloadProgress(currLink: object) {
@@ -360,6 +399,16 @@ export class DataService {
           } else {
                await this.storage.remove('BackEndURL');
           }
+     }
+
+     async saveDebugging() {
+          console.log("Saving when it is " + this.debugging)
+          await this.storage.set('Debugging', this.debugging);      
+     }
+
+     async saveMobileMode() {
+          console.log(`Saving this.isMobilePlatform when its value is ${this.isMobilePlatform}`)
+          await this.storage.set('MobileMode', this.isMobilePlatform);      
      }
 
      searchVideos(query: string): Observable <any> {
