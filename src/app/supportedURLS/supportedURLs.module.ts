@@ -2,16 +2,16 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { FormsModule } from '@angular/forms';
-import { Y2MPage } from './y2m.page';
-import { Y2MPageRoutingModule } from './y2m-routing.module';
+import { SupportedURLSPage } from './supportsURLS.page';
+import { SupportedURLSPageRoutingModule } from './supportedURLS-routing.module';
 
 @NgModule({
   imports: [
     CommonModule,
     FormsModule,    
     IonicModule,
-    Y2MPageRoutingModule
+    SupportedURLSPageRoutingModule 
   ],
-  declarations: [Y2MPage]
+  declarations: [SupportedURLSPage ]
 })
-export class Y2MPageModule {}
+export class SupportedURLSPageModule {}

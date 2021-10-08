@@ -1,10 +1,13 @@
 // TO DO
 // change web icon
 // change android/ios icon
-
+// Make title bar uniform across all tabs
 // downloading does not work on mobile
+
+// TO DO LATER
 // do not start dl progress for now
 // audio fingerprinting does not work
+// copy latest version of server side script
 
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../core/data.service';

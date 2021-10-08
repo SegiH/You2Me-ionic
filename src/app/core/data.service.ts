@@ -268,8 +268,6 @@ export class DataService {
           const debugging = await this.storage.get('Debugging');
 
           this.debugging=(debugging === true ? true : false);
-
-          console.log(`getting value when debugging=${debugging} and this.debugging=${this.debugging}`)
      }
 
      async getMobileMode() {

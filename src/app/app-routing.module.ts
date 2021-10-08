@@ -3,6 +3,11 @@ import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
 
 const routes: Routes = [
   {
+    path: '',
+    loadChildren: () => import('./y2m/y2m.module').then( m => m.Y2MPageModule),
+    pathMatch: 'full'
+  },
+  {
     path: 'y2m',
     redirectTo: '',
   },
@@ -18,12 +23,10 @@ const routes: Routes = [
     path: 'Search',
     redirectTo: 'search',
     pathMatch: 'full'
-  },
-  {
-    path: '',
-    loadChildren: () => import('./y2m/y2m.module').then( m => m.Y2MPageModule),
-    pathMatch: 'full'
-  },
+  },{
+    path: 'SupportedURLS',
+    loadChildren: () => import('./supportedURLS/supportedURLs.module').then( m => m.SupportedURLSPageModule)
+  }
 ];
 
 @NgModule({

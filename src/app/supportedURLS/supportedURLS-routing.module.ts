@@ -1,11 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { Y2MPage } from './y2m.page';
+import { SupportedURLSPage } from './supportsURLS.page';
 
 const routes: Routes = [
   {
     path: '',
-    component: Y2MPage,
+    component: SupportedURLSPage,
   }
 ];
 
@@ -13,4 +13,4 @@ const routes: Routes = [
   imports: [RouterModule.forChild(routes)],
   exports: [RouterModule]
 })
-export class Y2MPageRoutingModule {}
+export class SupportedURLSPageRoutingModule {}
