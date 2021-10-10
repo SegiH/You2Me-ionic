@@ -13,8 +13,10 @@ import { Component, OnInit } from '@angular/core';
 import { DataService } from '../core/data.service';
 import { DownloadService } from '../core/download.service';
 import { interval } from "rxjs";
-import { AlertController } from '@ionic/angular';
+import { AlertController, IonicSafeString } from '@ionic/angular';
 import { MenuController } from '@ionic/angular';
+import { HTTP } from '@ionic-native/http/ngx';
+import { File } from '@ionic-native/file/ngx';
 
 @Component({
      selector: 'app-y2m',
@@ -24,7 +26,7 @@ import { MenuController } from '@ionic/angular';
 export class Y2MPage implements OnInit  {
      urlParams: {};
   
-     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController) { }
+     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController,private nativeHTTP: HTTP,private file: File) {} 
 
      ngOnInit() {
           // Save current debugging value
@@ -167,25 +169,35 @@ export class Y2MPage implements OnInit  {
 
           currLink['DownloadButtonClicked'] = true;
 
-          // Subscribe to DL service and wait for the done response 
-          this.downloads.download(currLink['DownloadLink'], fileNameWithoutPath).subscribe((response) => {
-               //console.log("Response: " + response.state);               
-               if (response.state === "DONE") {
-                    this.dataService.showSnackBarMessage(currLink['DownloadLink']);
-                    this.dataService.deleteLink(currLink['URL']); // Delete link from list
+          if (!this.dataService.platform.is('android') && !this.dataService.platform.is('ios')) {
+               // Subscribe to DL service and wait for the done response 
+               this.downloads.download(currLink['DownloadLink'], fileNameWithoutPath).subscribe((response) => {
+                    //console.log("Response: " + response.state);               
+                    if (response.state === "DONE") {
+                         this.dataService.deleteLink(currLink['URL']); // Delete link from list
 
-                    // Send request to delete the file
-                    this.dataService.deleteDownloadFile(currLink['Filename']).subscribe((response) => { },
-                    error => {
-                         console.log("An error " + error + " occurred deleting the file from the server 1");
-                    });
-               }
-          },
-          error => {
-              this.dataService.deleteLink(currLink['URL']);
+                         // Send request to delete the file
+                         this.dataService.deleteDownloadFile(currLink['Filename']).subscribe((response) => { },
+                         error => {
+                              console.log("An error " + error + " occurred deleting the file from the server 1");
+                         });
+                    }
+               },
+               error => {
+                   this.dataService.deleteLink(currLink['URL']);
 
-               console.log("An error " + error + " occurred deleting the file from the server 2");
-          });
+                    console.log("An error " + error + " occurred deleting the file from the server 2");
+               });
+          } else {
+               const filePath = (this.dataService.platform.is('ios') ? this.file.documentsDirectory : this.file.dataDirectory ) + fileNameWithoutPath;
+               
+               this.dataService.platform.ready().then(() => {
+                    this.nativeHTTP.downloadFile(currLink['DownloadLink'],{},{},fileNameWithoutPath).then(response => {
+                    }).catch(err => {
+                         this.dataService.showSnackBarMessage(` The error ${err} occurred while downloading the file`);
+                    })
+               });
+          }
      }
 
      finished(currLink: object, isError = false) {
@@ -481,63 +493,3 @@ export class Y2MPage implements OnInit  {
           });
      }
 }
-
-  // Probably won't be implemented
-  /*applySupportedURLsFilter(filterValue: string) {
-    //this.supportedURLsDataSource.filter = filterValue.trim().toLowerCase();
-  }*/
-
-// Probably won't be implemented
-/*createSupportedURLsFilter() {
-    const filterFunction = function (data: string, filter: string): boolean {
-         const customSearch = () => {
-              if (data.toLowerCase().includes(filter.toLowerCase())) // case insensitive
-                   return true;
-         }
-
-         return customSearch();
-    }
-
-    return filterFunction;
-}*/
-
-// May not be implemented
-/*
-getColumnSize() {  // If there is more than 1 link or there is 1 link and it is MP3 format, return 2 to span grid 2 columns wide. Otherwise span 1 column wide
-    const columnLength=(this.dataService.getLinks().length > 1 ? 2 :  // When there is more than 1 link always show all columns               
-         this.dataService.getLinks().length == 1 && this.dataService. isMP3Format(this.dataService.links[0].Format) ? 2 :  1 // If there is 1 link and it is mp3 format, show all columns
-               
-    );
-
-    return columnLength;
-}
-
-getTotalColumnSize() {
-    const allColumns=15;
-    const audioColumns=10;
-    const videoColumns=8;
-    const noLinksColumns=7;
-
-    // When there is more than 1 link always show all columns
-    const columnLength=(this.dataService.getLinks().length == 0  ? noLinksColumns :  this.dataService.getLinks().length > 1 ? allColumns :                 
-         this.dataService.getLinks().length == 1 && this.dataService. isMP3Format(this.dataService.links[0].Format) ? allColumns : // If there is 1 link and it is mp3 format, show all columns
-               this.dataService. isAudioFormat(this.dataService.links[0].Format) ? audioColumns : videoColumns // If there is 1 link and it is audio (but not mp3) 
-    );
-
-    return columnLength;
-}*/
-
-// Probably won't be implemented
-/*showSupportedSitesToggle() {
-     if (this.supportedURLsVisible && typeof this.supportedURLsDataSource === 'undefined') {
-         this.dataService.getSupportedURLs().subscribe((response) => {
-              if (typeof response == 'undefined')
-                   return;
-
-              this.supportedURLsDataSource = response;
-         },
-         error => {
-              this.handleError(null, Response, error);
-         });
-    }
-}*/
