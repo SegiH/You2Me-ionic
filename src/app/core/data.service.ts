@@ -377,7 +377,12 @@ export class DataService {
 
      processStep(path: string, params: HttpParams): Observable<any> {
           if (this.backendURL == null) {
-               return;
+               this.getBackendURL();
+
+               setTimeout(function() {
+                    if (this.backendURL == null)
+                         return;
+               },3000);               
           }
 
           return this.http.get<any>(this.backendURL + path, { params: params})

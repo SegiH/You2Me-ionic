@@ -28,10 +28,10 @@ export class Y2MPage implements OnInit  {
 
      ngOnInit() {
           // Save current debugging value
-          const currDebugging = this.dataService.debugging;
+          //const currDebugging = this.dataService.debugging;
 
           // Enable debugging if Debugging was provided as URL parameter. Otherwise default to currDebugging
-          this.dataService.debugging = (this.getURLParam("Debugging") != this.dataService.debugging && this.getURLParam("Debugging") ? this.getURLParam("Debugging") : currDebugging);
+          //this.dataService.debugging = (this.getURLParam("Debugging") != this.dataService.debugging && this.getURLParam("Debugging") ? this.getURLParam("Debugging") : currDebugging);
       
           document.title = `You2Me ${(this.dataService.debugging ? ` (Debugging)` : ``)}`
 
