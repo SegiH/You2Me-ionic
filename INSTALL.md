@@ -46,7 +46,7 @@ To run the backend on your own server:
 1. Copy `package.json` and `you2mebackend.js` to the Node.js web server
 1. Run `npm install` to install missing dependencies
 1. Create /media and give this folder write permissions
-1. Run node you2mebackend.js as the web server script
+1. Run `node you2mebackend.js` to start the web server
 
 ### URL Parameters
 You can supply default values for all of the fields by providing URL parameters.

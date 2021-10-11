@@ -62,6 +62,9 @@ export class DataService {
      constructor(public toastController: ToastController, private http: HttpClient, platform: Platform ,private storage: Storage) {
           this.platform = platform;
 
+          if (this.platform.is('android') || this.platform.is('ios'))
+               this.isMobilePlatform=true;
+
           // Load Youtube player API code
           if (!this.apiLoaded) {
                // This code loads the IFrame Player API code asynchronously, according to the instructions at https://developers.google.com/youtube/iframe_api_reference#Getting_Started

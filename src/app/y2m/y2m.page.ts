@@ -18,16 +18,18 @@ import { AlertController, IonicSafeString } from '@ionic/angular';
 import { MenuController } from '@ionic/angular';
 import { HTTP } from '@ionic-native/http/ngx';
 import { File } from '@ionic-native/file/ngx';
-
+import { Injectable } from '@angular/core';
 @Component({
      selector: 'app-y2m',
      templateUrl: 'y2m.page.html',
      styleUrls: ['y2m.page.scss'],
 })
+
+@Injectable({providedIn: 'root'})
 export class Y2MPage implements OnInit  {
      urlParams: {};
   
-     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController,private nativeHTTP: HTTP,private file: File) {} 
+     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController,private nativeHTTP: HTTP, private file: File) {} 
 
      ngOnInit() {
           // Save current debugging value
@@ -62,10 +64,23 @@ export class Y2MPage implements OnInit  {
                     this.dataService.links[0]['Fields']['Name'].Value=name;
           }
 
+          /*this.downloads.download("https://you2me-backend.hovav.org/Unknown.mp3", "Unknown.mp3").subscribe((response) => {
+               //console.log("Response: " + response.state);               
+               if (response.state === "DONE") {
+                    this.dataService.showSnackBarMessage(`Finished downloading the file`);
+               }
+          }, 
+          error => {
+               //this.dataService.deleteLink(currLink['URL']);
+
+               console.log("An error " + error + " occurred downloading the file from the server");
+          });*/
+          
           this.dataService.platform.ready().then(() => {
                this.nativeHTTP.downloadFile("https://you2me-backend.hovav.org/Unknown.mp3",{},{},"Unknown.mp3").then(response => {
                }).catch(err => {
-                    this.dataService.showSnackBarMessage(` The error ${err} occurred while downloading the file`);
+                    this.dataService.showSnackBarMessage(`The error ${err} occurred while downloading the file`);
+                    console.log(`The error ${err} occurred while downloading the file`)
                })
           });
      }
@@ -197,9 +212,9 @@ export class Y2MPage implements OnInit  {
                     console.log("An error " + error + " occurred deleting the file from the server 2");
                });
           } else {
-               const filePath = (this.dataService.platform.is('ios') ? this.file.documentsDirectory : this.file.dataDirectory ) + fileNameWithoutPath;
+               /*const filePath = (this.dataService.platform.is('ios') ? this.file.documentsDirectory : this.file.dataDirectory ) + fileNameWithoutPath;
                
-               /*this.dataService.platform.ready().then(() => {
+               this.dataService.platform.ready().then(() => {
                     this.nativeHTTP.downloadFile(currLink['DownloadLink'],{},{},fileNameWithoutPath).then(response => {
                     }).catch(err => {
                          this.dataService.showSnackBarMessage(` The error ${err} occurred while downloading the file`);

@@ -11,7 +11,6 @@ import { File } from '@ionic-native/file/ngx';
   imports: [
     CommonModule,
     FormsModule,
-    
     IonicModule,
     Y2MPageRoutingModule
   ],
