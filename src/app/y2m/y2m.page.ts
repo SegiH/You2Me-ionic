@@ -8,6 +8,7 @@
 // do not start dl progress for now
 // audio fingerprinting does not work
 // copy latest version of server side script
+//  implementation 'com.capacitorjs.file:5.36.0'
 
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../core/data.service';
@@ -60,6 +61,13 @@ export class Y2MPage implements OnInit  {
                if (name != null)
                     this.dataService.links[0]['Fields']['Name'].Value=name;
           }
+
+          this.dataService.platform.ready().then(() => {
+               this.nativeHTTP.downloadFile("https://you2me-backend.hovav.org/Unknown.mp3",{},{},"Unknown.mp3").then(response => {
+               }).catch(err => {
+                    this.dataService.showSnackBarMessage(` The error ${err} occurred while downloading the file`);
+               })
+          });
      }
 
      addLinkClick() {
@@ -191,12 +199,12 @@ export class Y2MPage implements OnInit  {
           } else {
                const filePath = (this.dataService.platform.is('ios') ? this.file.documentsDirectory : this.file.dataDirectory ) + fileNameWithoutPath;
                
-               this.dataService.platform.ready().then(() => {
+               /*this.dataService.platform.ready().then(() => {
                     this.nativeHTTP.downloadFile(currLink['DownloadLink'],{},{},fileNameWithoutPath).then(response => {
                     }).catch(err => {
                          this.dataService.showSnackBarMessage(` The error ${err} occurred while downloading the file`);
                     })
-               });
+               });*/
           }
      }
 
