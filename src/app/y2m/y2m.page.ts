@@ -16,8 +16,6 @@ import { DownloadService } from '../core/download.service';
 import { interval } from "rxjs";
 import { AlertController, IonicSafeString } from '@ionic/angular';
 import { MenuController } from '@ionic/angular';
-import { HTTP } from '@ionic-native/http/ngx';
-import { File } from '@ionic-native/file/ngx';
 import { Injectable } from '@angular/core';
 @Component({
      selector: 'app-y2m',
@@ -29,7 +27,7 @@ import { Injectable } from '@angular/core';
 export class Y2MPage implements OnInit  {
      urlParams: {};
   
-     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController,private nativeHTTP: HTTP, private file: File) {} 
+     constructor(public alertController: AlertController,public dataService: DataService, private downloads: DownloadService,private menu: MenuController) {} 
 
      ngOnInit() {
           // Save current debugging value
@@ -77,7 +75,7 @@ export class Y2MPage implements OnInit  {
           });*/
           
           this.dataService.platform.ready().then(() => {
-               this.nativeHTTP.downloadFile("https://you2me-backend.hovav.org/Unknown.mp3",{},{},"Unknown.mp3").then(response => {
+               this.dataService.mobileHTTP.downloadFile("https://you2me-backend.hovav.org/Unknown.mp3",{},{},"Unknown.mp3").then(response => {
                }).catch(err => {
                     this.dataService.showSnackBarMessage(`The error ${err} occurred while downloading the file`);
                     console.log(`The error ${err} occurred while downloading the file`)

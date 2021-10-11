@@ -6,10 +6,12 @@ import { UUID } from 'angular2-uuid';
 import { Platform } from '@ionic/angular';
 import { ToastController } from '@ionic/angular';
 import { Storage } from '@ionic/storage';
+import { HTTP } from '@ionic-native/http/ngx';
 
 let stepperIndex = 0;
-
-@Injectable()
+@Injectable({
+     providedIn: "root",
+   })
 export class DataService {
      apiLoaded = false;
      backendURL: string=null;
@@ -59,7 +61,7 @@ export class DataService {
      readonly URLParameters = ['URL','Artist','Album','Format','Genre','Name','TrackNum','MoveToServer','Year','Debugging'];
      YTSearchOverlayRef;
      
-     constructor(public toastController: ToastController, private http: HttpClient, platform: Platform ,private storage: Storage) {
+     constructor(public toastController: ToastController, private http: HttpClient, platform: Platform ,public mobileHTTP: HTTP, private storage: Storage) {
           this.platform = platform;
 
           if (this.platform.is('android') || this.platform.is('ios'))
