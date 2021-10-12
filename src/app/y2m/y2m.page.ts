@@ -74,13 +74,13 @@ export class Y2MPage implements OnInit  {
                console.log("An error " + error + " occurred downloading the file from the server");
           });*/
           
-          this.dataService.platform.ready().then(() => {
+          /*this.dataService.platform.ready().then(() => {
                this.dataService.mobileHTTP.downloadFile("https://you2me-backend.hovav.org/Unknown.mp3",{},{},"Unknown.mp3").then(response => {
                }).catch(err => {
                     this.dataService.showSnackBarMessage(`The error ${err} occurred while downloading the file`);
                     console.log(`The error ${err} occurred while downloading the file`)
                })
-          });
+          });*/
      }
 
      addLinkClick() {

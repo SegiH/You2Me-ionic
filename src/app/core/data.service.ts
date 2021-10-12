@@ -76,8 +76,8 @@ export class DataService {
                this.apiLoaded = true;               
           }
 
-          if (this.platform.is('hybrid'))
-               this.isMobilePlatform=true;
+          //if (this.platform.is('hybrid'))
+          //     this.isMobilePlatform=true;
 
           this.getBackendURL();
 
