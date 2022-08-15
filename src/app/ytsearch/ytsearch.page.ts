@@ -22,7 +22,11 @@ export class YTSearchComponent implements OnInit {
 
      constructor(public dataService: DataService) { }
 
-     ngOnInit(): void {
+     async ngOnInit() {
+        if (!this.dataService.isBackEndURLSet()) {
+            await this.dataService.getBackendURL();
+        }
+        
         this.dataService.getAPIKey().subscribe((response) => {  
             this.dataService.setAPIKey(response[0].APIKey);
         },
@@ -33,13 +37,13 @@ export class YTSearchComponent implements OnInit {
         });
 
         // Load Youtube player API code
-        if (!this.apiLoaded) {
+        /*if (!this.apiLoaded) {
              // This code loads the IFrame Player API code asynchronously, according to the instructions at https://developers.google.com/youtube/iframe_api_reference#Getting_Started
              const tag = document.createElement('script');
              tag.src = 'https://www.youtube.com/iframe_api';
              document.body.appendChild(tag);
              this.apiLoaded = true;               
-        }
+        }*/
      }
 
      ngOnDestroy(): void { }

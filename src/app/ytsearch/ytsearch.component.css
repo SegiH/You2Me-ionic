@@ -44,10 +44,14 @@
     z-index: 999;
 }
 
+ion-card {
+     background-color: #dadbdc;
+}
+
 ion-card-title {
     font-size: 32px !important;
     font-weight: bold; 
-    text-align: center;
+    text-align: center;    
 }
 
 mat-card {

@@ -1,7 +1,6 @@
 // TO DO
 // change web icon
 // change android/ios icon
-// Make title bar uniform across all tabs
 // downloading does not work on mobile
 
 // TO DO LATER
