@@ -1,5 +1,12 @@
-Supported URLS
+<ion-card>
+    <ion-card-header class="ion-inherit-color ios hydrated">
+         <ion-card-subtitle></ion-card-subtitle>
+         <ion-card-title >Supported URLS</ion-card-title>
+    </ion-card-header>
 
-<ion-list>
-    <ion-item *ngFor="let currLink of supportedURLS;trackBy: trackByFn">{{currLink}}</ion-item>
-</ion-list>
+    <ion-card-content>
+        <ion-list>
+            <ion-item *ngFor="let currLink of supportedURLS;trackBy: trackByFn">{{currLink}}</ion-item>
+        </ion-list>
+    </ion-card-content>
+</ion-card>

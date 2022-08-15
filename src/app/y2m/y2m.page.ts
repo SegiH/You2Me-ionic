@@ -8,7 +8,7 @@
 // do not start dl progress for now
 // audio fingerprinting does not work
 // copy latest version of server side script
-//  implementation 'com.capacitorjs.file:5.36.0'
+// implementation 'com.capacitorjs.file:5.36.0'
 
 import { Component, OnInit } from '@angular/core';
 import { DataService } from '../core/data.service';

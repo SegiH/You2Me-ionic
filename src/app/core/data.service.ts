@@ -14,7 +14,7 @@ let stepperIndex = 0;
    })
 export class DataService {
      apiLoaded = false;
-     backendURL: string=null;
+     backendURL: string = null;
      links: any = [];
      private API_TOKEN="";
      readonly API_URL='https://www.googleapis.com/youtube/v3/search';
@@ -221,11 +221,17 @@ export class DataService {
                if (response === null)
                     return Promise.reject('Null response when getting formats');
      
-               response.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
-               Object.freeze(this.formats);
-                 
-               response.map(x => this.formatKeys.push(x.FormatName));
-               Object.freeze(this.formatKeys);
+               // Since the format object is frozen from being modified, only do this once
+               if (Object.keys(this.formats).length == 0) {
+                    response.map(x => this.formats[x.FormatName] = { FormatDisplayName : x.FormatDisplayName, FormatTypeName: x.FormatTypeName, IsMP3Format: (x.IsMP3Format == "1" ? true : false) } );
+                    Object.freeze(this.formats);
+               }
+
+               // Since the formatKeys object is frozen from being modified, only do this once
+               if (Object.keys(this.formatKeys).length == 0) {                 
+                    response.map(x => this.formatKeys.push(x.FormatName));
+                    Object.freeze(this.formatKeys);
+               }
           },
           error => {
                const formats= [
@@ -307,7 +313,23 @@ export class DataService {
      }
 
      getSupportedURLs() {
+          /*if (this.backendURL == null) {
+               console.log("Returning");
+               return;
+          }*/
+
           return this.processStep("/GetSupportedURLs",null);
+
+          /*if (!this.isBackEndURLSet()) {
+               this.getBackendURL();
+
+               
+                    this.getSupportedURLs()
+               
+               return;
+          } else {
+               return this.processStep("/GetSupportedURLs",null);
+          }*/
      }
 
      getThumbnail(videoId:string) {
@@ -343,6 +365,10 @@ export class DataService {
           });
 
           return isAudio;
+     }
+
+     isBackEndURLSet() {
+          return this.backendURL !== null;
      }
 
      isMoveToServerAllowed() {
@@ -384,11 +410,16 @@ export class DataService {
           if (this.backendURL == null) {
                this.getBackendURL();
 
-               setTimeout(function() {
-                    if (this.backendURL == null)
-                         return;
-               },3000);               
+               setTimeout(() => {
+                    this.processStep(path, params);
+                    //if (this.backendURL == null)
+                    //     return;
+               },3000);
+               
+               return;
           }
+
+          console.log(`Here with backend URL ${this.backendURL}, path=${path} and params=${params}`)
 
           return this.http.get<any>(this.backendURL + path, { params: params})
                .pipe(

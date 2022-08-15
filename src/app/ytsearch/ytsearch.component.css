@@ -44,6 +44,12 @@
     z-index: 999;
 }
 
+ion-card-title {
+    font-size: 32px !important;
+    font-weight: bold; 
+    text-align: center;
+}
+
 mat-card {
     /*border-style: solid;
     border-width: 1px !important;*/

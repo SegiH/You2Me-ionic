@@ -11,7 +11,11 @@ export class SupportedURLSPage implements OnInit  {
 
     constructor(public dataService: DataService) { }
 
-    ngOnInit() {
+    async ngOnInit() {
+        if (!this.dataService.isBackEndURLSet()) {
+            await this.dataService.getBackendURL();
+        }
+
         this.dataService.getSupportedURLs().subscribe((response) => {
             if (typeof response == 'undefined')
                  return;

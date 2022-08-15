@@ -23,7 +23,6 @@ export class YTSearchComponent implements OnInit {
      constructor(public dataService: DataService) { }
 
      ngOnInit(): void {
-         debugger;
         this.dataService.getAPIKey().subscribe((response) => {  
             this.dataService.setAPIKey(response[0].APIKey);
         },
